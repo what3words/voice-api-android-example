@@ -32,7 +32,7 @@ interface VoiceApiListener {
 class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
     companion object {
         //TODO: please replace with your api key
-        const val API_KEY = "9X327865"
+        const val API_KEY = "YOUR_API_KEY"
         const val BASE_URL = "wss://voiceapi.what3words.com/v1/autosuggest"
     }
 
