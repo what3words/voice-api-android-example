@@ -126,5 +126,6 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
     override fun error(message: String) {
         stopAudio()
         Log.e("MainActivity", message)
+        Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show()
     }
 }

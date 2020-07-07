@@ -32,7 +32,7 @@ interface VoiceApiListener {
 class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
     companion object {
         //TODO: please replace with your api key
-        const val API_KEY = "YOUR_API_KEY"
+        const val API_KEY = "9X327865"
         const val BASE_URL = "wss://voiceapi.what3words.com/v1/autosuggest"
     }
 
@@ -120,6 +120,14 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
             ) {
                 super.onFailure(webSocket, t, response)
                 t.message?.let { listener?.error(it) }
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                super.onClosing(webSocket, code, reason)
+                if (code != 1000) {
+                    listener?.error(reason)
+                    webSocket.close(code, reason)
+                }
             }
         })
     }
