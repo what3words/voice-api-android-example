@@ -1,5 +1,6 @@
 package com.what3words.voiceapidemo
 
+import android.util.Log
 import com.google.gson.Gson
 import okhttp3.*
 import org.json.JSONObject
@@ -97,6 +98,7 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 super.onMessage(webSocket, text)
+                Log.i("VoiceApi", "onMessage - $text")
                 val message = Gson().fromJson(text, BaseVoiceMessagePayload::class.java)
                 if (message.message == BaseVoiceMessagePayload.RecognitionStarted) {
                     listener?.connected(webSocket)
@@ -119,12 +121,14 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
                 t: Throwable,
                 response: Response?
             ) {
+                Log.e("VoiceApi", "onFailure: ${t.message}")
                 super.onFailure(webSocket, t, response)
                 t.message?.let { listener?.error(it) }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 super.onClosing(webSocket, code, reason)
+                Log.i("VoiceApi", "onClosing - code:$code, reason:$reason")
                 if (code != 1000) {
                     listener?.error(reason)
                     webSocket.close(code, reason)
@@ -132,6 +136,7 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                Log.i("VoiceApi", "onClosed - code:$code, reason:$reason")
                 super.onClosed(webSocket, code, reason)
                 socket = null
             }

@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
     private fun stopAudio() {
         runOnUiThread { imgRecording.setImageResource(R.drawable.ic_not_recording) }
         continueRecording = false
+        recorder?.stop()
         recorder?.release()
     }
 
@@ -103,28 +104,28 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
 
     override fun connected(webSocket: WebSocket) {
         // recording and UI updates should be done on IO and UI threads, achieve this using coroutines, RX, asyncTask, etc.
-        runOnUiThread {
-            adapter.setData(emptyList())
-            imgRecording.setImageResource(R.drawable.ic_recording)
-        }
-        val background = Thread(Runnable {
-            recorder = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                RECORDING_RATE,
-                CHANNEL,
-                FORMAT,
-                bufferSize
-            ).also {
-                continueRecording = true
-                val buffer = ByteArray(bufferSize)
-                it.startRecording()
+        recorder = AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            RECORDING_RATE,
+            CHANNEL,
+            FORMAT,
+            bufferSize
+        ).also {
+            runOnUiThread {
+                adapter.setData(emptyList())
+                imgRecording.setImageResource(R.drawable.ic_recording)
+            }
+            continueRecording = true
+            val buffer = ByteArray(bufferSize)
+            it.startRecording()
+            val background = Thread(Runnable {
                 while (continueRecording) {
                     it.read(buffer, 0, buffer.size)
                     webSocket.send(ByteString.of(*buffer))
                 }
-            }
-        })
-        background.start()
+            })
+            background.start()
+        }
     }
 
     override fun suggestions(suggestions: List<Suggestion>) {
