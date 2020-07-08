@@ -32,7 +32,7 @@ interface VoiceApiListener {
 class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
     companion object {
         //TODO: please replace with your api key
-        const val API_KEY = "YOUR_API_KEY"
+        const val API_KEY = "YOUR_API_KEY_HERE"
         const val BASE_URL = "wss://voiceapi.what3words.com/v1/autosuggest"
     }
 
@@ -66,6 +66,7 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
         circleCenterLong: Double? = null,
         circleCenterRadius: Double? = null
     ) {
+        if (socket != null) throw Exception("socket already open")
         val url = createSocketUrl(
             language,
             resultCount,
@@ -78,7 +79,7 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
             circleCenterRadius
         )
         val request = Request.Builder().url(url).build()
-        OkHttpClient().newWebSocket(request, object : WebSocketListener() {
+        socket = OkHttpClient().newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 super.onOpen(webSocket, response)
                 val message = JSONObject(
@@ -128,6 +129,11 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
                     listener?.error(reason)
                     webSocket.close(code, reason)
                 }
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                super.onClosed(webSocket, code, reason)
+                socket = null
             }
         })
     }

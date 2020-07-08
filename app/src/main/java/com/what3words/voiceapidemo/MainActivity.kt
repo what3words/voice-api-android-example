@@ -5,8 +5,10 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
@@ -44,16 +46,25 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
         //check RECORD_AUDIO permissions
         imgRecording.setOnClickListener {
             if (continueRecording) return@setOnClickListener
-            try {
-                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    startVoiceApi()
-                } else {
-                    requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), AUDIO_PERMISSION)
-                }
-            } catch (e: SecurityException) {
-                Log.e("MainActivity", e.message)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                handlePermissions()
+            } else {
+                startVoiceApi()
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun handlePermissions() {
+        try {
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+            ) {
+                startVoiceApi()
+            } else {
+                requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), AUDIO_PERMISSION)
+            }
+        } catch (e: SecurityException) {
+            Log.e("MainActivity", e.message)
         }
     }
 
