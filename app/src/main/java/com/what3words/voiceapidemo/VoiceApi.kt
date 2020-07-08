@@ -3,6 +3,7 @@ package com.what3words.voiceapidemo
 import android.util.Log
 import com.google.gson.Gson
 import okhttp3.*
+import okio.ByteString
 import org.json.JSONObject
 
 /**
@@ -12,7 +13,7 @@ interface VoiceApiListener {
     /**
      * When WebSocket successfully does the handshake with VoiceAPI
      */
-    fun connected(webSocket: WebSocket)
+    fun connected()
 
     /**
      * When VoiceAPI receive the recording, processed it and retrieved what3word addresses
@@ -101,7 +102,7 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
                 Log.i("VoiceApi", "onMessage - $text")
                 val message = Gson().fromJson(text, BaseVoiceMessagePayload::class.java)
                 if (message.message == BaseVoiceMessagePayload.RecognitionStarted) {
-                    listener?.connected(webSocket)
+                    listener?.connected()
                 }
 
                 if (message.message == BaseVoiceMessagePayload.Suggestions) {
@@ -141,6 +142,10 @@ class VoiceApi constructor(private val listener: VoiceApiListener? = null) {
                 socket = null
             }
         })
+    }
+
+    fun send(data: ByteString) {
+        socket?.send(data)
     }
 
     /**

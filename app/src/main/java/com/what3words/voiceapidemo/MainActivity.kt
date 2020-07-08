@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import okhttp3.WebSocket
 import okio.ByteString
 
 class MainActivity : AppCompatActivity(), VoiceApiListener {
@@ -43,9 +42,9 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
         listSuggestions.layoutManager = LinearLayoutManager(this)
         listSuggestions.adapter = adapter
 
-        //check RECORD_AUDIO permissions
         imgRecording.setOnClickListener {
             if (continueRecording) return@setOnClickListener
+            //check RECORD_AUDIO permissions for android versions >= 23
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 handlePermissions()
             } else {
@@ -102,8 +101,13 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
         }
     }
 
-    override fun connected(webSocket: WebSocket) {
-        // recording and UI updates should be done on IO and UI threads, achieve this using coroutines, RX, asyncTask, etc.
+    override fun connected() {
+        //update UI
+        runOnUiThread {
+            adapter.setData(emptyList())
+            imgRecording.setImageResource(R.drawable.ic_recording)
+        }
+        //setup AudioRecord recording
         recorder = AudioRecord(
             MediaRecorder.AudioSource.MIC,
             RECORDING_RATE,
@@ -111,19 +115,16 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
             FORMAT,
             bufferSize
         ).also {
-            runOnUiThread {
-                adapter.setData(emptyList())
-                imgRecording.setImageResource(R.drawable.ic_recording)
-            }
             continueRecording = true
             val buffer = ByteArray(bufferSize)
-            it.startRecording()
+            //it.read is blocking so it should be run on a different thread, you can handle this with RX, coroutines, AsyncTask, etc.
             val background = Thread(Runnable {
                 while (continueRecording) {
                     it.read(buffer, 0, buffer.size)
-                    webSocket.send(ByteString.of(*buffer))
+                    voiceApi.send(ByteString.of(*buffer))
                 }
             })
+            it.startRecording()
             background.start()
         }
     }
