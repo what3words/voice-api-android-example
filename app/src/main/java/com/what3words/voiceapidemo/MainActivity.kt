@@ -77,8 +77,7 @@ class MainActivity : AppCompatActivity(), VoiceApiListener {
     private fun stopAudio() {
         runOnUiThread { imgRecording.setImageResource(R.drawable.ic_not_recording) }
         continueRecording = false
-        recorder?.stop()
-        recorder?.release()
+        if (recorder?.recordingState != AudioRecord.STATE_UNINITIALIZED) recorder?.release()
     }
 
     override fun onRequestPermissionsResult(
