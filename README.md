@@ -9,16 +9,18 @@ The first steps to getting started are:
 1. [Get your free API key](https://accounts.what3words.com/create-api-key).
 2. Currently the Voice API is in beta, and therefore, access is granted upon request. Please contact us at voiceapi@what3words.com to **enable the Voice API** for your account.
 3. Take a look at the [online documentation](https://developer.what3words.com/voice-api).
-4. Replace YOUR_API_KEY_HERE placeholder on VoiceApi.kt
+4. Replace `YOUR_API_KEY_HERE` placeholder on VoiceApi.kt
 
 ### Requirements
 
 Android 5.0+,
-Android Studio+ 
+Android Studio
 
 ### Overview
 
 This is a quick example using what3words' VoiceAPI.  It is a very minimal implementation to show how the basics work.  It is designed to provide illumnation on the API in advance of a full Android API wrapper being formally published.
+
+**Please bear in mind that the Android Emulator cannot record audio. Therefore, you will need to test on a real device that can record.**
 
 ##### class MainActivity
 
