@@ -20,9 +20,7 @@ Android Studio+
 
 This is a quick example using what3words' VoiceAPI.  It is a very minimal implementation to show how the basics work.  It is designed to provide illumnation on the API in advance of a full Android API wrapper being formally published.
 
-##### class ViewController
-
-<img src='figure1.png' width='256' style='float:right'>
+##### class MainActivity
 
 This heart of this very basic app is in `MainActivity` which contains a `VoiceApi` to use our VoiceApi with webSockets (okhttp3 used in this example) and uses `AudioRecord` to users record voice. It basically turns on the microphone and streams audio data to the VoiceApi when a button is tapped.
 
